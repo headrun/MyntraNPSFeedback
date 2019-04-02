@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">FeedbackCollection</string>
+    <string name="hindi">हिंदी</string>
+    <string name="kannada">ಕನ್ನಡ</string>
+    <string name="marathi">मराठी</string>
+    <string name="tamil">தமிழ்</string>
+    <string name="english_ques">How was your day today?</string>
+    <string name="hindi_ques">आपका आज का दिन कैसा था?</string>
+    <string name="kannada_ques">ಇಂದು ನಿಮ್ಮ ದಿನ ಹೇಗಿತ್ತು?</string>
+    <string name="marathi_ques">तुमचा आजचा दिवस कसा होता?</string>
+    <string name="tamil_ques">இன்று உங்களுடைய நாள் எப்படி இருந்தது?</string>
+</resources>

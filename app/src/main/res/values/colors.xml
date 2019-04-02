@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#2C3E50</color>
+    <color name="colorPrimaryDark">#292E49</color>
+    <color name="colorAccent">#292E49</color>
+    <color name="red">#E12929</color>
+    <color name="black">#000000</color>
+    <color name="white">#ffffff</color>
+    <color name="light_grey">#F2F3F4</color>
+    <color name="card_color">#566573</color>
+    <color name="grey">#99A3A4</color>
+    <color name="button_text_color">#76D7C4</color>
+    <color name="green">#2ECC71</color>
+</resources>

@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="Gradle: com.tapadoo.android:alerter:2.0.1@aar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/alerter-2.0.1.aar/2caa0f5ef7c3dd3d227a81b7ef7a42f2/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/alerter-2.0.1.aar/2caa0f5ef7c3dd3d227a81b7ef7a42f2/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
