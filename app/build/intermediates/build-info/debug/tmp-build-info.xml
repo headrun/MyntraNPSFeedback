@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<instant-run
+    abi="armeabi-v7a,armeabi"
+    api-level="27"
+    build-mode="FULL"
+    density="xxhdpi"
+    format="10"
+    plugin-version="3.4.0"
+    timestamp="1557052415490"
+    token="1228487034611950478"
+    verifier="FULL_BUILD_REQUESTED" >
+
+    <task
+        name="javac"
+        duration="1718" />
+    <task
+        name="instant-run-dex"
+        duration="0" />
+    <task
+        name="instant-run-transform"
+        duration="273" />
+    <task
+        name="verifier"
+        duration="397" />
+
+    <artifact
+        location="/Users/suraj/Documents/FeedbackCollection/app/build/intermediates/resources/instant-run/debug/resources-debug.apk"
+        type="SPLIT" />
+    <artifact
+        location="/Users/suraj/Documents/FeedbackCollection/app/build/intermediates/split-apk/debug/dep/dependencies.apk"
+        type="SPLIT" />
+
+</instant-run>

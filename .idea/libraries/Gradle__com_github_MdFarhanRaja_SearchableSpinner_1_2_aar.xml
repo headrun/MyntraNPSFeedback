@@ -1,8 +1,8 @@
 <component name="libraryTable">
   <library name="Gradle: com.github.MdFarhanRaja:SearchableSpinner:1.2@aar">
     <CLASSES>
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/SearchableSpinner-1.2.aar/3b4955b2bdacf8dcdd40c7a797273768/res" />
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/SearchableSpinner-1.2.aar/3b4955b2bdacf8dcdd40c7a797273768/jars/classes.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/c691a6db4a25e61b2ec9406b9f95d528/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/c691a6db4a25e61b2ec9406b9f95d528/res" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
