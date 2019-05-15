@@ -39,7 +39,6 @@ class FeedbackActivity : AppCompatActivity() {
             return
         }
         feedbackViewModel.employee_id = bundle.getString("employee_id")
-        feedbackViewModel.document_id = bundle.getString("document_id")
 
         img_good.setOnClickListener {
 
@@ -55,45 +54,6 @@ class FeedbackActivity : AppCompatActivity() {
         img_poor.setOnClickListener {
 
             feedbackViewModel.displayView(2, img_good, img_avg, img_poor, this)
-        }
-
-        card_submit.setOnClickListener {
-            if (feedbackViewModel.superior_feedback == " ") {
-
-                ToastUtils.showLong("Please give feedback.")
-
-                return@setOnClickListener
-            }
-
-            if (!NetworkUtils.isConnected()) {
-                ToastUtils.showLong("Oops no network connection! Please connect to the internet.")
-                return@setOnClickListener
-            }
-
-            card_submit!!.text = "Please wait.."
-
-            val time = System.currentTimeMillis()
-
-            val date = Date(time)
-            @SuppressLint("SimpleDateFormat") val format = SimpleDateFormat("dd-MM-yyyy")
-            val getDate = format.format(date)
-
-            MyApplication.get()?.getmFirebaseFirestore()?.collection(Constants.EMPLOYEE_FEEDBACK)
-                    ?.document(feedbackViewModel.employee_id!!)?.collection(Constants.EMPLOYEE_SESSION)
-                    ?.document(feedbackViewModel.document_id!!)
-                    ?.update(
-                            "check_out_date", getDate,
-                            "check_out_time", time,
-                            "checkedOut", true,
-                            "feedback_time", time,
-                            "superior_experience", feedbackViewModel.superior_feedback
-                    )?.addOnSuccessListener {
-                        ToastUtils.showLong("Thanks for giving feedback")
-                        finish()
-                        Bungee.slideRight(this@FeedbackActivity)
-                    }
-            General.hideKeyboard(this)
-
         }
 
     }

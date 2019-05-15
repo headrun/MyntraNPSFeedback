@@ -47,4 +47,41 @@ object General {
                 .setDuration(3000)
                 .show()
     }
+
+    //        try {
+//            val date1 = Date(System.currentTimeMillis())
+//            @SuppressLint("SimpleDateFormat") val format = SimpleDateFormat("HH:mm:ss")
+//            val getTime = format.format(date1)
+//            val time1 = SimpleDateFormat("HH:mm:ss").parse(getTime)
+//            val calendar1 = Calendar.getInstance()
+//            calendar1.time = time1
+//
+//            val someRandomTime = "13:00:00"
+//            val d = SimpleDateFormat("HH:mm:ss").parse(someRandomTime)
+//            val calendar3 = Calendar.getInstance()
+//            calendar3.time = d
+//            //            calendar3.add(Calendar.DATE, 1);
+//
+//            val x = calendar3.time
+//            if (x.after(calendar1.time)) {
+//                General.alertDialog(activity, "Checked in Successfully.", null)
+//                model.check_in_time = time
+//                model.isCheckedIn = true
+//                model.employee_id = scanned_id
+//                model.check_in_date = date
+//
+//                MyApplication.get()?.getmFirebaseFirestore()?.collection(Constants.EMPLOYEE_FEEDBACK)
+//                        ?.document(scanned_id)?.collection(Constants.EMPLOYEE_SESSION)?.document()
+//                        ?.set(model)?.addOnSuccessListener { updateLastCheckInTime(scanned_id, time, activity, et_employee_id) }
+//                        ?.addOnFailureListener {
+//                            General.hideKeyboard(activity)
+//                            et_employee_id.text.clear()
+//                            et_employee_id.requestFocus()
+//                        }
+//            } else {
+//                General.redDialog(activity, "You have crossed the check-in time for today.", null)
+//            }
+//        } catch (e: ParseException) {
+//            e.printStackTrace()
+//        }
 }

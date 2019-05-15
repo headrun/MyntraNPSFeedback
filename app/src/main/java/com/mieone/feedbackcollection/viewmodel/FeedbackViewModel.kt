@@ -20,7 +20,6 @@ class FeedbackViewModel(application: Application) : AndroidViewModel(application
 
     var superior_feedback = " "
     var employee_id: String? = null
-    var document_id: String? = null
 
     fun displayView(position: Int, img_good: ImageView, img_avg: ImageView, img_poor: ImageView, activity: Activity) {
 
@@ -61,9 +60,8 @@ class FeedbackViewModel(application: Application) : AndroidViewModel(application
         val getDate = format.format(date)
 
         MyApplication.get()?.getmFirebaseFirestore()?.collection(Constants.EMPLOYEE_FEEDBACK)
-                ?.document(employee_id!!)?.collection(Constants.EMPLOYEE_SESSION)?.document(document_id!!)
+                ?.document(employee_id!!)
                 ?.update(
-                        "check_out_date", getDate,
                         "check_out_time", time,
                         "checkedOut", true,
                         "feedback_time", time,

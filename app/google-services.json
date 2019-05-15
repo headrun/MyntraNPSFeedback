@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "884588656291-unlnjo2vpj361jkve869cc4rft40s6mv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mieone.feedbackcollection",
+            "certificate_hash": "fd4b0c9e112616c42314711c7461e971809eae6c"
+          }
+        },
+        {
           "client_id": "884588656291-oogr2hneriu05plqgj0vg35815fq61qn.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -25,15 +33,13 @@
         }
       ],
       "services": {
-        "analytics_service": {
-          "status": 1
-        },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
-        },
-        "ads_service": {
-          "status": 2
+          "other_platform_oauth_client": [
+            {
+              "client_id": "884588656291-oogr2hneriu05plqgj0vg35815fq61qn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

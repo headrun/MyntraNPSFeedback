@@ -1,28 +1,41 @@
 package com.mieone.feedbackcollection.viewmodel
 
 import `in`.galaxyofandroid.spinerdialog.SpinnerDialog
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Application
+import android.os.Build
 import android.os.Handler
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
+import android.view.View
 import android.widget.EditText
+import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import com.blankj.utilcode.util.LogUtils
 import com.blankj.utilcode.util.NetworkUtils
 import com.blankj.utilcode.util.ToastUtils
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.*
+import com.karumi.dexter.Dexter
+import com.karumi.dexter.MultiplePermissionsReport
+import com.karumi.dexter.PermissionToken
+import com.karumi.dexter.listener.PermissionRequest
+import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import com.mieone.feedbackcollection.R
 import com.mieone.feedbackcollection.application.MyApplication
+import com.mieone.feedbackcollection.dialog.DownloadFile
+import com.mieone.feedbackcollection.dialog.DownloadTask
 import com.mieone.feedbackcollection.dialog.UpdateDialog
 import com.mieone.feedbackcollection.model.EmployeeFeedbackModel
+import com.mieone.feedbackcollection.model.UpdateModel
+import com.mieone.feedbackcollection.ui.MainActivity
 import com.mieone.feedbackcollection.utils.ActivityManager
 import com.mieone.feedbackcollection.utils.Constants
 import com.mieone.feedbackcollection.utils.General
-import java.text.ParseException
+import com.yarolegovich.lovelydialog.LovelyInfoDialog
+import com.yarolegovich.lovelydialog.LovelyStandardDialog
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -31,6 +44,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     internal var count = 0
     private var languageList = ArrayList<String>()
+    var isExistence = true
+    lateinit var url: String
+    var downloadTask: DownloadTask?=null
+    val handler: Handler = Handler()
 
     fun getLanguageList(activity: Activity) {
         val languageDialog = SpinnerDialog(activity, languageList, "Select or Search Language", R.style.DialogAnimations_SmileWindow)
@@ -40,6 +57,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             ToastUtils.showLong(s)
         }
         MyApplication.get()?.getmFirebaseFirestore()?.collection(Constants.FEEDBACK_QUESTION)?.get()?.addOnCompleteListener { task ->
+            languageList.clear()
             for (document in task.result!!) {
                 languageList.add(document.id)
             }
@@ -48,13 +66,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun getUpdate(verCode: String, dialog: UpdateDialog, context: Activity) {
+    fun getUpdate(verCode: String, dialog: LovelyStandardDialog) {
 
         MyApplication.get()?.getmFirebaseDataBase()?.getReference(Constants.APK_Path)?.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (!dataSnapshot.hasChild(verCode)) {
                     dialog.show()
-                    dialog.setUpdateBtn(context, context)
                 }
             }
 
@@ -64,53 +81,58 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         })
     }
 
+
     fun addTextWatcher(et_employee_id: EditText, activity: Activity){
 
         et_employee_id.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
             }
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+                handler.removeCallbacksAndMessages(null)
             }
             override fun afterTextChanged(s: Editable) {
                 if (!NetworkUtils.isConnected()) {
                     General.redDialog(activity, "Oops no Internet Connection!", null)
                     return
                 }
-                Handler().postDelayed(
-                        {
-                            val scanned_id = et_employee_id.text.toString()
-                            if (scanned_id.length >= 4) {
+
+                handler.postDelayed(
+                    {
+                            val scanned_id = et_employee_id.text.toString().replace("[-+.^:,]", "")
+                            if (scanned_id.length in 4..12) {
                                 count++
                                 if (count == 1) {
 
-                                    getEmployeeDetails(scanned_id, activity, et_employee_id)
+                                    ToastUtils.showLong(scanned_id)
 
-                                    //                                        getLastCheckTime(scanned_id);
-
+                                    getEmployeeDetails(scanned_id, activity)
                                     General.hideKeyboard(activity)
 
-                                    et_employee_id.text.clear()
+                                    et_employee_id.setText("")
                                     et_employee_id.requestFocus()
 
                                     count = 0
                                 }
+                            }else{
+                                et_employee_id.setText("")
+                                et_employee_id.requestFocus()
                             }
-                        }, 1000)
+//                            }
+                    }, 1000)
 
             }
         })
     }
 
-    private fun getEmployeeDetails(scanned_id: String, activity: Activity, et_employee_id: EditText) {
+    fun getEmployeeDetails(scanned_id: String, activity: Activity) {
 
-        MyApplication.get()?.getmFirebaseFirestore()?.collection(Constants.EMPLOYEE_RECORDS)?.document(scanned_id)?.get()?.addOnCompleteListener { task ->
+        MyApplication.get()?.getmFirebaseFirestore()?.collection(Constants.EMPLOYEE_RECORDS)
+                ?.document(scanned_id)?.get()?.addOnCompleteListener { task ->
             if (task.isSuccessful) {
 
                 val model = EmployeeFeedbackModel()
 
                 val document = task.result
-
-                LogUtils.e(document?.exists())
 
                 if (document!!.exists()) {
 
@@ -126,205 +148,182 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     model.vendor = vendor
                     model.department = department
                     model.doj = doj
+                    model.check_in_time = System.currentTimeMillis()
+                    model.isCheckedIn = true
+                    model.employee_id = scanned_id
 
-                    getLastCheckTime(scanned_id, activity, et_employee_id, model)
+                    getLastCheckTime(scanned_id, activity, model)
 
                 } else {
 
-//                    val employeeData = HashMap<String, Any>()
-//                    employeeData["name"] = " "
-//                    employeeData["manager"] = " "
-//                    employeeData["employee_code"] = " "
-//                    employeeData["vendor"] = " "
-//                    employeeData["department"] = " "
-//                    employeeData["doj"] = " "
+                    model.check_in_time = System.currentTimeMillis()
+                    model.isCheckedIn = true
+                    model.employee_id = scanned_id
 
                     General.redDialog(activity, "Not Authorized!! Please contact your manager.", null)
-                    getLastCheckTime(scanned_id, activity, et_employee_id, model)
-
-//                    MyApplication.get()?.getmFirebaseFirestore()?.collection(Constants.EMPLOYEE_RECORDS)
-//                            ?.document(scanned_id)?.set(model)?.addOnSuccessListener {
-//                                getLastCheckTime(scanned_id, activity, et_employee_id, model)
-//                            }
+                    getLastCheckTime(scanned_id, activity, model)
 
                 }
 
             }
         }
-
     }
 
-    private fun getLastCheckTime(scanned_id: String, activity: Activity, et_employee_id: EditText, model: EmployeeFeedbackModel) {
+    private fun getLastCheckTime(scanned_id: String, activity: Activity, model: EmployeeFeedbackModel) {
 
         if (!NetworkUtils.isConnected()) {
             General.redDialog(activity, "Oops no Internet Connection!", null)
             return
         }
 
+//        ToastUtils.showLong(scanned_id)
+
         val time = System.currentTimeMillis()
-        val date = Date(time)
-        @SuppressLint("SimpleDateFormat") val format = SimpleDateFormat("dd-MM-yyyy")
-        val getDate = format.format(date)
+        val c = Calendar.getInstance()
+        c.add(Calendar.HOUR, -16)
+
+        LogUtils.e("TIME ->"+c.timeInMillis)
 
         MyApplication.get()?.getmFirebaseFirestore()?.collection(Constants.EMPLOYEE_FEEDBACK)
-                ?.document(scanned_id)?.get()?.addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val document = task.result
-                if (document!!.exists()) {
-                    val last_check_in = document.getLong("last_check_in")!!
-                    val runningTime = System.currentTimeMillis() - last_check_in
+                ?.whereEqualTo("employee_id", scanned_id)
+                ?.whereGreaterThan("check_in_time", c.timeInMillis)
+                ?.get()
+                ?.addOnCompleteListener { task ->
+                    LogUtils.e(task.isSuccessful)
+                    LogUtils.e(task.result?.isEmpty)
+
+                    if (task.result?.isEmpty!!){
+                        updateCheckInTime(scanned_id, time, activity, model)
+                    }
+
+                    for (document in task.result!!){
+                        LogUtils.e(document.id+" "+document.data)
+                        val afterTime = document.getLong("check_in_time")
+                        afterTime?.let { getCheckInTime(document.id, it, activity, scanned_id) }
+                    }
+                }
+
+        //                                val runningTime = System.currentTimeMillis() - last_check_in
+//                                val mins = TimeUnit.MILLISECONDS.toMinutes(runningTime)
+
+    }
+
+    private fun updateCheckInTime(scanned_id: String, time: Long,
+                                  activity: Activity, model: EmployeeFeedbackModel) {
+
+        General.alertDialog(activity, "Checked in Successfully with employee id $scanned_id", null)
+        model.check_in_time = time
+        model.isCheckedIn = true
+        model.employee_id = scanned_id
+
+        MyApplication.get()?.getmFirebaseFirestore()?.collection(Constants.EMPLOYEE_FEEDBACK)
+                ?.document()
+                ?.set(model)
+
+
+    }
+
+    private fun getCheckInTime(document_id: String, check_in_time: Long, activity: Activity, scanned_id: String) {
+
+        MyApplication.get()?.getmFirebaseFirestore()?.collection(Constants.EMPLOYEE_FEEDBACK)
+                ?.document(document_id)?.get()?.addOnCompleteListener { task ->
+                    val snapshots = task.result
+
+                    val runningTime = System.currentTimeMillis() - check_in_time
+
                     val mins = TimeUnit.MILLISECONDS.toMinutes(runningTime)
 
-                    if (mins > 15 * 60) {
+                    LogUtils.e("Minutes ->$mins")
 
-                        updateCheckInTime(scanned_id, getDate, time, activity, et_employee_id, model)
+                    LogUtils.e(mins >  6 * 60)
+
+            if (mins >  6 * 60) {
+
+                    if (snapshots?.getBoolean("checkedOut") == true) {
+
+                        General.redDialog(activity, "$scanned_id Already checked out for the day.", null)
 
                     } else {
 
-                        getCheckInTime(scanned_id, last_check_in, activity, et_employee_id)
+                        ActivityManager.FEEDBACK(activity, document_id)
+
                     }
+                }
+            else {
 
-
-                } else {
-                    LogUtils.e("No such document")
-                    updateCheckInTime(scanned_id, getDate, time, activity, et_employee_id, model)
+                    General.redDialog(activity, "$scanned_id Already checked in.", null)
                 }
 
-                General.hideKeyboard(activity)
-                et_employee_id.text.clear()
-                et_employee_id.requestFocus()
-
-            } else {
-                LogUtils.e("get failed with ", task.exception)
-                General.hideKeyboard(activity)
-                et_employee_id.text.clear()
-                et_employee_id.requestFocus()
-            }
-        }
-
-    }
-
-    private fun updateCheckInTime(scanned_id: String, date: String, time: Long,
-                                  activity: Activity, et_employee_id: EditText, model: EmployeeFeedbackModel) {
-
-
-        try {
-            val date1 = Date(System.currentTimeMillis())
-            @SuppressLint("SimpleDateFormat") val format = SimpleDateFormat("HH:mm:ss")
-            val getTime = format.format(date1)
-            val time1 = SimpleDateFormat("HH:mm:ss").parse(getTime)
-            val calendar1 = Calendar.getInstance()
-            calendar1.time = time1
-
-            val someRandomTime = "13:00:00"
-            val d = SimpleDateFormat("HH:mm:ss").parse(someRandomTime)
-            val calendar3 = Calendar.getInstance()
-            calendar3.time = d
-            //            calendar3.add(Calendar.DATE, 1);
-
-            val x = calendar3.time
-            if (x.after(calendar1.time)) {
-                General.alertDialog(activity, "Checked in Successfully.", null)
-                model.check_in_time = time
-                model.isCheckedIn = true
-                model.employee_id = scanned_id
-                model.check_in_date = date
-
-                MyApplication.get()?.getmFirebaseFirestore()?.collection(Constants.EMPLOYEE_FEEDBACK)
-                        ?.document(scanned_id)?.collection(Constants.EMPLOYEE_SESSION)?.document()
-                        ?.set(model)?.addOnSuccessListener { updateLastCheckInTime(scanned_id, time, activity, et_employee_id) }
-                        ?.addOnFailureListener {
-                            General.hideKeyboard(activity)
-                            et_employee_id.text.clear()
-                            et_employee_id.requestFocus()
-                        }
-            } else {
-                General.redDialog(activity, "You have crossed the check-in time for today.", null)
-            }
-        } catch (e: ParseException) {
-            e.printStackTrace()
-        }
-
-        //        if (pm.equals(getTime)) {
-        //
-        //            General.redDialog(MainActivity.this, "You have crossed the check-in time for today.", null);
-        //
-        //        }else {
-        //            General.alertDialog(MainActivity.this, "Checked in Successfully.", null);
-        //
-        //            model.setCheck_in_time(time);
-        //            model.setCheckedIn(true);
-        //            model.setet_employee_id(scanned_id);
-        //            model.setCheck_in_date(date);
-        //
-        //            MyApplication.get().getmFirebaseFirestore().collection(Constants.EMPLOYEE_FEEDBACK)
-        //                    .document(scanned_id).collection(Constants.EMPLOYEE_SESSION).document().set(model)
-        //                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-        //                        @Override
-        //                        public void onSuccess(Void aVoid) {
-        //
-        //                            updateLastCheckInTime(scanned_id, time);
-        //
-        //                        }
-        //                    }).addOnFailureListener(new OnFailureListener() {
-        //                @Override
-        //                public void onFailure(@NonNull Exception e) {
-        //                    General.hideKeyboard(MainActivity.this);
-        //                    et_employee_id.getText().clear();
-        //                    et_employee_id.requestFocus();
-        //                }
-        //            });
-        //        }
-
-    }
-
-    private fun getCheckInTime(scanned_id: String, check_in_time: Long, activity: Activity, et_employee_id: EditText) {
-
-        MyApplication.get()?.getmFirebaseFirestore()?.collection(Constants.EMPLOYEE_FEEDBACK)?.document(scanned_id)?.collection(Constants.EMPLOYEE_SESSION)?.whereEqualTo("check_in_time", check_in_time)?.get()?.addOnCompleteListener { task ->
-            val snapshots = task.result
-
-            val check_in_time = snapshots!!.documents[0].getLong("check_in_time")!!
-            val runningTime = System.currentTimeMillis() - check_in_time
-
-            val mins = TimeUnit.MILLISECONDS.toMinutes(runningTime)
-
-            LogUtils.e("Minutes ->$mins")
-
-            if (mins > 6 * 60) {
-
-                if (snapshots.documents[0].getBoolean("checkedOut") == true) {
-
-                    General.redDialog(activity, "Already checked out for the day.", null)
-
-                } else {
-
-                    ActivityManager.FEEDBACK(activity, scanned_id, snapshots.documents[0].id)
-
-                }
-            } else {
-
-                General.redDialog(activity, "Already checked in.", null)
-            }
-
-            et_employee_id.text.clear()
-            et_employee_id.requestFocus()
         }?.addOnFailureListener {
             General.hideKeyboard(activity)
-            et_employee_id.text.clear()
-            et_employee_id.requestFocus()
         }
 
     }
 
-    private fun updateLastCheckInTime(scanned_id: String, time: Long, activity: Activity, et_employee_id: EditText) {
+    fun anonymousLogin(activity: Activity){
+        MyApplication.get()?.getmAuth()?.signInAnonymously()
+                ?.addOnCompleteListener(activity) { task ->
+                    if (task.isSuccessful) {
+                        // Sign in success, update UI with the signed-in user's information
+                        LogUtils.e( "signInAnonymously:success")
+                    } else {
+                        // If sign in fails, display a message to the user.
+                        LogUtils.e("signInAnonymously:failure", task.exception)
+                    }
+                }
+    }
 
-        val data = HashMap<String, Any>()
-        data["last_check_in"] = time
+    fun requestPermission(databaseReference: DatabaseReference, activity: Activity){
 
-        MyApplication.get()?.getmFirebaseFirestore()?.collection(Constants.EMPLOYEE_FEEDBACK)?.document(scanned_id)?.set(data)?.addOnSuccessListener { }?.addOnFailureListener {
-            General.hideKeyboard(activity)
-            et_employee_id.text.clear()
-            et_employee_id.requestFocus()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            activity.stopLockTask()
         }
+
+        Dexter.withActivity(activity)
+                .withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                .withListener(object : MultiplePermissionsListener {
+                    override fun onPermissionsChecked(report: MultiplePermissionsReport) {
+                        if (report.areAllPermissionsGranted()) {
+                            LogUtils.e("Clicking...")
+                            getAPKUrl(databaseReference,activity)
+                        } else {
+                        }
+
+                    }
+
+                    override fun onPermissionRationaleShouldBeShown(permissions: List<PermissionRequest>, token: PermissionToken) {
+                        token.continuePermissionRequest()
+                    }
+                }).check()
+    }
+
+    private fun getAPKUrl(databaseReference: DatabaseReference, activity: Activity) {
+
+        downloadTask = DownloadTask(activity)
+
+        databaseReference.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+
+                for (dataSnapshot in snapshot.children) {
+
+                    val updateModel = dataSnapshot.getValue(UpdateModel::class.java)
+                    updateModel!!.url
+
+                    url = updateModel.url.toString()
+
+                    LogUtils.e(url)
+
+                }
+
+                LogUtils.e(url)
+                downloadTask?.execute(url)
+
+
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+
+            }
+        })
     }
 }

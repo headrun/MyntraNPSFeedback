@@ -15,11 +15,10 @@ object ActivityManager {
         context.startActivity(Intent(context, MainActivity::class.java))
     }
 
-    fun FEEDBACK(context: Context, employee_id: String, document_id: String) {
+    fun FEEDBACK(context: Context, employee_id: String) {
 
         val intent = Intent(context, FeedbackActivity::class.java)
         intent.putExtra("employee_id", employee_id)
-        intent.putExtra("document_id", document_id)
         context.startActivity(intent)
         Bungee.slideLeft(context)
     }

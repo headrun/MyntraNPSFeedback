@@ -66,10 +66,8 @@
             </LinearLayout>
 
             <LinearLayout
-                android:layout_below="@+id/upper_linear"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
                 android:id="@+id/dis_bottom_holder"
                 android:visibility="visible"
                 android:orientation="vertical"
@@ -86,8 +84,7 @@
                     card_view:cardUseCompatPadding="true"
                     app:cardElevation="2dp"
                     android:layout_marginBottom="10dp"
-                    app:cardPreventCornerOverlap="false"
-                    android:layout_below="@+id/play_user_status">
+                    app:cardPreventCornerOverlap="false">
 
                     <TextView
                         android:layout_width="wrap_content"

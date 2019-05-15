@@ -2,11 +2,12 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rl_parent"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:focusableInTouchMode="true"
-    android:keepScreenOn="true"
     android:background="@drawable/gradient"
+    android:keepScreenOn="true"
     tools:context=".ui.MainActivity">
 
     <LinearLayout
@@ -16,34 +17,36 @@
         android:gravity="center"
         android:weightSum="1">
 
-        <TextView
-            android:id="@+id/nps_feedback"
-            android:layout_weight="0.3"
+        <ImageView
+            android:id="@+id/img_barcode"
+            android:layout_marginTop="30dp"
+            android:layout_weight="0.5"
             android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:text="Myntra NPS Feedback"
-            android:layout_centerHorizontal="true"
-            android:textColor="@color/white"
-            android:textSize="30sp"/>
+            android:layout_height="0dp"/>
+
 
         <LinearLayout
             android:layout_below="@+id/nps_feedback"
             android:id="@+id/below_ll"
-            android:layout_weight="0.7"
+            android:layout_weight="0.5"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:orientation="vertical"
             android:gravity="center"
             android:layout_centerInParent="true">
 
-            <com.airbnb.lottie.LottieAnimationView
-                android:id="@+id/lottie"
+            <TextView
+                android:id="@+id/nps_feedback"
+                android:layout_weight="0.3"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
                 android:layout_gravity="center"
                 android:gravity="center"
-                android:layout_width="400dp"
-                android:layout_height="300dp"/>
+                android:text="Myntra NPS Feedback"
+                android:layout_centerHorizontal="true"
+                android:textColor="@color/white"
+                android:textSize="30sp"/>
+
 
             <EditText
                 android:id="@+id/et_employee_id"
@@ -51,6 +54,8 @@
                 android:layout_marginRight="100dp"
                 android:layout_gravity="center"
                 android:gravity="center"
+                android:imeOptions="actionNext"
+                android:maxLines="1"
                 android:visibility="visible"
                 android:background="#00000000"
                 android:cursorVisible="false"
@@ -62,6 +67,21 @@
         </LinearLayout>
 
     </LinearLayout>
+
+    <!--<EditText-->
+        <!--android:id="@+id/et_employee_id"-->
+        <!--android:layout_marginLeft="100dp"-->
+        <!--android:layout_marginRight="100dp"-->
+        <!--android:layout_gravity="center"-->
+        <!--android:gravity="center"-->
+        <!--android:imeOptions="actionNext"-->
+        <!--android:maxLines="1"-->
+        <!--android:visibility="visible"-->
+        <!--android:layout_centerInParent="true"-->
+        <!--android:cursorVisible="false"-->
+        <!--android:textColor="#00000000"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"/>-->
 
     <com.wang.avi.AVLoadingIndicatorView
         android:id="@+id/avi_main"

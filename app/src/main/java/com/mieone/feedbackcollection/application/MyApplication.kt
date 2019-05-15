@@ -9,6 +9,9 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
 
 import io.paperdb.Paper
+import android.os.StrictMode
+
+
 
 class MyApplication : Application() {
     private var mFirebaseDataBase: FirebaseDatabase? = null
@@ -22,6 +25,9 @@ class MyApplication : Application() {
         Paper.init(applicationContext)
         Utils.init(this)
         FirebaseDatabase.getInstance().setPersistenceEnabled(true)
+
+        val builder = StrictMode.VmPolicy.Builder()
+        StrictMode.setVmPolicy(builder.build())
     }
 
     fun getmFirebaseDataBase(): FirebaseDatabase {

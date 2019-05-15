@@ -4,6 +4,17 @@
             "outputFile": "/Users/suraj/Documents/FeedbackCollection/app/build/intermediates/incremental/mergeDebugResources/merged.dir/values-v23/values-v23.xml",
             "map": [
                 {
+                    "source": "/Users/suraj/.gradle/caches/transforms-2/files-2.1/bb0f3dd4e5f5a3f4d59512ef9dd6fcf5/res/values-v23/values-v23.xml",
+                    "from": {
+                        "startLines": "2,3,4,5,6,20,34,35,36,37,41,42,43,44",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "55,190,325,400,487,1371,2267,2386,2513,2618,2842,2957,3064,3177",
+                        "endLines": "2,3,4,5,19,33,34,35,36,40,41,42,43,47",
+                        "endColumns": "134,134,74,86,12,12,118,126,104,12,114,106,112,12",
+                        "endOffsets": "185,320,395,482,1366,2262,2381,2508,2613,2837,2952,3059,3172,3402"
+                    }
+                },
+                {
                     "source": "/Users/suraj/.gradle/caches/transforms-2/files-2.1/68ad7810f23ca73973f5a41ae86dd891/res/values-v23/values-v23.xml",
                     "from": {
                         "startLines": "2",
@@ -23,33 +34,22 @@
                     }
                 },
                 {
-                    "source": "/Users/suraj/.gradle/caches/transforms-2/files-2.1/9e91c164a6d61319869724a99a32130f/res/values-v23/values-v23.xml",
+                    "source": "/Users/suraj/.gradle/caches/transforms-2/files-2.1/9a34f5777d96fba1513d15d01c4ed28e/res/values-v23/values-v23.xml",
                     "from": {
-                        "startLines": "2,5",
-                        "startColumns": "4,4",
-                        "startOffsets": "55,215",
-                        "endLines": "4,7",
-                        "endColumns": "10,10",
-                        "endOffsets": "210,379"
+                        "startLines": "2,6,9,12",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "55,330,502,662",
+                        "endLines": "5,8,11,14",
+                        "endColumns": "10,10,10,10",
+                        "endOffsets": "325,497,657,826"
                     },
                     "to": {
-                        "startLines": "51,54",
-                        "startColumns": "4,4",
-                        "startOffsets": "3557,3717",
-                        "endLines": "53,56",
-                        "endColumns": "10,10",
-                        "endOffsets": "3712,3881"
-                    }
-                },
-                {
-                    "source": "/Users/suraj/.gradle/caches/transforms-2/files-2.1/4f3632bb322640f61ee947aa17ef2f67/res/values-v23/values-v23.xml",
-                    "from": {
-                        "startLines": "2,3,4,5,6,20,34,35,36,37,41,42,43,44",
-                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4",
-                        "startOffsets": "55,190,325,400,487,1371,2267,2386,2513,2618,2842,2957,3064,3177",
-                        "endLines": "2,3,4,5,19,33,34,35,36,40,41,42,43,47",
-                        "endColumns": "134,134,74,86,12,12,118,126,104,12,114,106,112,12",
-                        "endOffsets": "185,320,395,482,1366,2262,2381,2508,2613,2837,2952,3059,3172,3402"
+                        "startLines": "51,55,58,61",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "3557,3832,4004,4164",
+                        "endLines": "54,57,60,63",
+                        "endColumns": "10,10,10,10",
+                        "endOffsets": "3827,3999,4159,4328"
                     }
                 }
             ]
