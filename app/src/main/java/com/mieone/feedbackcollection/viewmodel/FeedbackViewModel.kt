@@ -56,8 +56,6 @@ class FeedbackViewModel(application: Application) : AndroidViewModel(application
         val time = System.currentTimeMillis()
 
         val date = Date(time)
-        @SuppressLint("SimpleDateFormat") val format = SimpleDateFormat("dd-MM-yyyy")
-        val getDate = format.format(date)
 
         MyApplication.get()?.getmFirebaseFirestore()?.collection(Constants.EMPLOYEE_FEEDBACK)
                 ?.document(employee_id!!)

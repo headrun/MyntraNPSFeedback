@@ -11,12 +11,10 @@ import com.google.firebase.firestore.FirebaseFirestore
 import io.paperdb.Paper
 import android.os.StrictMode
 
-
-
 class MyApplication : Application() {
     private var mFirebaseDataBase: FirebaseDatabase? = null
     private var mFirebaseFirestore: FirebaseFirestore? = null
-    internal var mFirebaseUser: FirebaseUser? = null
+    private var mFirebaseUser: FirebaseUser? = null
     private var mAuth: FirebaseAuth? = null
 
     override fun onCreate() {

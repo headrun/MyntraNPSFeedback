@@ -17,7 +17,9 @@ import androidx.lifecycle.AndroidViewModel
 import com.blankj.utilcode.util.LogUtils
 import com.blankj.utilcode.util.NetworkUtils
 import com.blankj.utilcode.util.ToastUtils
+import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.database.*
+import com.google.firebase.firestore.QueryDocumentSnapshot
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
@@ -36,6 +38,7 @@ import com.mieone.feedbackcollection.utils.Constants
 import com.mieone.feedbackcollection.utils.General
 import com.yarolegovich.lovelydialog.LovelyInfoDialog
 import com.yarolegovich.lovelydialog.LovelyStandardDialog
+import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -80,7 +83,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
         })
     }
-
 
     fun addTextWatcher(et_employee_id: EditText, activity: Activity){
 
@@ -162,8 +164,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                     General.redDialog(activity, "Not Authorized!! Please contact your manager.", null)
                     getLastCheckTime(scanned_id, activity, model)
+                    LogUtils.e(scanned_id)
 
                 }
+
+                LogUtils.e(scanned_id)
 
             }
         }
@@ -175,8 +180,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             General.redDialog(activity, "Oops no Internet Connection!", null)
             return
         }
-
-//        ToastUtils.showLong(scanned_id)
 
         val time = System.currentTimeMillis()
         val c = Calendar.getInstance()
@@ -194,12 +197,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                     if (task.result?.isEmpty!!){
                         updateCheckInTime(scanned_id, time, activity, model)
-                    }
-
-                    for (document in task.result!!){
-                        LogUtils.e(document.id+" "+document.data)
-                        val afterTime = document.getLong("check_in_time")
-                        afterTime?.let { getCheckInTime(document.id, it, activity, scanned_id) }
+                    } else{
+                        General.redDialog(activity, "$scanned_id Already checked out for the day.", null)
                     }
                 }
 
@@ -208,17 +207,66 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     }
 
+    @SuppressLint("SimpleDateFormat")
     private fun updateCheckInTime(scanned_id: String, time: Long,
                                   activity: Activity, model: EmployeeFeedbackModel) {
 
-        General.alertDialog(activity, "Checked in Successfully with employee id $scanned_id", null)
-        model.check_in_time = time
-        model.isCheckedIn = true
-        model.employee_id = scanned_id
+        try {
+            val string1 = "16:59:00"
+            val time1 = SimpleDateFormat("HH:mm:ss").parse(string1)
+            val calendar1 = Calendar.getInstance()
+            calendar1.time = time1
 
-        MyApplication.get()?.getmFirebaseFirestore()?.collection(Constants.EMPLOYEE_FEEDBACK)
-                ?.document()
-                ?.set(model)
+            val string2 = "7:01:00"
+            val time2 = SimpleDateFormat("HH:mm:ss").parse(string2)
+            val calendar2 = Calendar.getInstance()
+            calendar2.time = time2
+
+            val time3 = System.currentTimeMillis()
+            val date = Date(time3)
+            val format = SimpleDateFormat("HH:mm:ss")
+            val getDate = format.format(date)
+
+            val d = SimpleDateFormat("HH:mm:ss").parse(getDate)
+            val calendar3 = Calendar.getInstance()
+            calendar3.time = d
+
+            val x = calendar3.time
+            if (x.after(calendar1.time) && x.before(calendar2.time)) {
+                LogUtils.e("true")
+                General.alertDialog(activity, "Checked in Successfully with employee id $scanned_id", null)
+                model.check_in_time = time
+                model.isCheckedIn = true
+                model.employee_id = scanned_id
+
+                MyApplication.get()?.getmFirebaseFirestore()?.collection(Constants.EMPLOYEE_FEEDBACK)
+                        ?.document()
+                        ?.set(model)?.addOnSuccessListener {
+                            val c = Calendar.getInstance()
+                            c.add(Calendar.HOUR, -16)
+
+                            MyApplication.get()?.getmFirebaseFirestore()?.collection(Constants.EMPLOYEE_FEEDBACK)
+                                    ?.whereEqualTo("employee_id", scanned_id)
+                                    ?.whereGreaterThan("check_in_time", c.timeInMillis)
+                                    ?.get()
+                                    ?.addOnCompleteListener { task ->
+
+                                        for (document in task.result!!){
+                                            LogUtils.e(document.id+" "+document.data)
+                                            val afterTime = document.getLong("check_in_time")
+                                            afterTime?.let { getCheckInTime(document.id, it, activity, scanned_id) }
+                                        }
+                                    }
+                        }
+
+//                getCheckInTime(scanned_id, time, activity, )
+            }else{
+                LogUtils.e("false")
+                General.redDialog(activity, "You have crossed the check in time for today.", null)
+            }
+        } catch (e: ParseException) {
+            e.printStackTrace()
+        }
 
 
     }
@@ -237,8 +285,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                     LogUtils.e(mins >  6 * 60)
 
-            if (mins >  6 * 60) {
-
                     if (snapshots?.getBoolean("checkedOut") == true) {
 
                         General.redDialog(activity, "$scanned_id Already checked out for the day.", null)
@@ -248,11 +294,23 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         ActivityManager.FEEDBACK(activity, document_id)
 
                     }
-                }
-            else {
 
-                    General.redDialog(activity, "$scanned_id Already checked in.", null)
-                }
+//            if (mins >  6 * 60) {
+//
+//                    if (snapshots?.getBoolean("checkedOut") == true) {
+//
+//                        General.redDialog(activity, "$scanned_id Already checked out for the day.", null)
+//
+//                    } else {
+//
+//                        ActivityManager.FEEDBACK(activity, document_id)
+//
+//                    }
+//                }
+//            else {
+//
+//                    General.redDialog(activity, "$scanned_id Already checked in.", null)
+//                }
 
         }?.addOnFailureListener {
             General.hideKeyboard(activity)

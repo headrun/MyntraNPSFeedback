@@ -10,14 +10,12 @@ import android.os.Build;
 import android.os.IBinder;
 import android.widget.Toast;
 import androidx.core.app.NotificationCompat;
-
 import com.mieone.feedbackcollection.ui.MainActivity;
-
 import static androidx.core.app.NotificationCompat.PRIORITY_MAX;
 
 public class BackgroundService extends Service {
-    boolean isStarted;
 
+    boolean isStarted;
 
     @Override
     public void onCreate() {
@@ -52,7 +50,6 @@ public class BackgroundService extends Service {
 
     private void startServiceOreoCondition(){
         if (Build.VERSION.SDK_INT >= 26) {
-
 
             String CHANNEL_ID = "my_service";
             String CHANNEL_NAME = "My Background Service";

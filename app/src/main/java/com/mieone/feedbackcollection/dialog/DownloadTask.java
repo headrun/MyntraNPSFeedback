@@ -24,8 +24,6 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
     @SuppressLint("StaticFieldLeak")
     private Context context;
     private ProgressDialog mProgressDialog;
-//    private String fileName;
-    private String folder;
 
     public DownloadTask(Context context) {
         this.context = context;
@@ -56,7 +54,8 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
 //            fileName = f_url[0].substring(f_url[0].lastIndexOf('/') + 1);
 
             //External directory path to save file
-            folder = Environment.getExternalStorageDirectory() + File.separator + "NPS/";
+            //    private String fileName;
+            String folder = Environment.getExternalStorageDirectory() + File.separator + "NPS/";
 
             //Create androiddeft folder if it does not exist
             File directory = new File(folder);
@@ -121,7 +120,6 @@ public class DownloadTask extends AsyncTask<String, Integer, String> {
         openNewVersion();
         if (result != null) {
             LogUtils.e(result);
-//            Toast.makeText(context, "Download error: " + result, Toast.LENGTH_LONG).show();
         }
         else
             Toast.makeText(context,"File downloaded", Toast.LENGTH_SHORT).show();
