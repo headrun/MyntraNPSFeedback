@@ -4,6 +4,7 @@ data class EmployeeFeedbackModel (
 
     var employee_id: String? = null,
     var superior_experience: String? = null,
+    var employee_status: String?=null,
     var name: String? = null,
     var manager: String? = null,
     var vendor: String? = null,

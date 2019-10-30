@@ -2,7 +2,6 @@ package com.mieone.feedbackcollection.ui
 
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
-import android.view.KeyEvent
 import androidx.appcompat.app.AppCompatActivity
 import com.blankj.utilcode.util.NetworkUtils
 import com.mieone.feedbackcollection.utils.General
@@ -11,7 +10,6 @@ import com.mieone.feedbackcollection.utils.Constants
 import com.mieone.feedbackcollection.viewmodel.MainViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 import android.os.*
-import android.widget.Toast
 import com.blankj.utilcode.util.LogUtils
 import com.bumptech.glide.Glide
 import com.google.firebase.database.DatabaseReference
@@ -65,7 +63,7 @@ class MainActivity : AppCompatActivity() {
         mainViewModel.anonymousLogin(this)
 
 //        MyApplication.get()?.getmFirebaseFirestore()?.collection(Constants.EMPLOYEE_FEEDBACK)
-//                ?.whereGreaterThan("check_in_time", 1562265000000)
+//                ?.whereEqualTo("employee_id", "asdfgh")
 //                ?.get()
 //                ?.addOnCompleteListener { task ->
 //                    LogUtils.e(task.isSuccessful)
@@ -75,7 +73,6 @@ class MainActivity : AppCompatActivity() {
 //
 //                    for (document in task.result!!) {
 //                        LogUtils.e(document.id)
-
 //                        MyApplication.get()?.getmFirebaseFirestore()?.collection(Constants.EMPLOYEE_FEEDBACK)
 //                                ?.document(document.id)?.delete()
 //                    }

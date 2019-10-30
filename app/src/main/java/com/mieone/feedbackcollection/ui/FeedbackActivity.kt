@@ -38,7 +38,13 @@ class FeedbackActivity : AppCompatActivity() {
             finish()
             return
         }
-        feedbackViewModel.employee_id = bundle.getString("employee_id")
+        feedbackViewModel.scanned_id = bundle.getString("scanned_id")
+        feedbackViewModel.name = bundle.getString("name")
+        feedbackViewModel.manager = bundle.getString("manager")
+        feedbackViewModel.vendor = bundle.getString("vendor")
+        feedbackViewModel.department = bundle.getString("department")
+        feedbackViewModel.doj = bundle.getString("doj")
+        feedbackViewModel.employee_status = bundle.getString("employee_status")
 
         img_good.setOnClickListener {
 

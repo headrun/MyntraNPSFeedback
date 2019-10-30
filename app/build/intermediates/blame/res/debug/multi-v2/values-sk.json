@@ -4,7 +4,7 @@
             "outputFile": "/Users/suraj/Documents/FeedbackCollection/app/build/intermediates/incremental/mergeDebugResources/merged.dir/values-sk/values-sk.xml",
             "map": [
                 {
-                    "source": "/Users/suraj/.gradle/caches/transforms-2/files-2.1/1cc2a0b69859892538dc7f8459a63327/res/values-sk/values.xml",
+                    "source": "/Users/suraj/.gradle/caches/transforms-2/files-2.1/d5949da8b00cc8d91a728fab6997fa79/res/values-sk/values.xml",
                     "from": {
                         "startLines": "4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20",
                         "startColumns": "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0",
@@ -18,6 +18,23 @@
                         "startOffsets": "2817,2925,3117,3243,3355,3570,3700,3843,4172,4400,4513,4714,4846,5068,5262,5360,5457",
                         "endColumns": "107,191,125,111,214,129,142,130,227,112,200,131,221,193,97,96,115",
                         "endOffsets": "2920,3112,3238,3350,3565,3695,3838,3969,4395,4508,4709,4841,5063,5257,5355,5452,5568"
+                    }
+                },
+                {
+                    "source": "/Users/suraj/.gradle/caches/transforms-2/files-2.1/446163588d8703b0e8e33280727cae6d/res/values-sk/values.xml",
+                    "from": {
+                        "startLines": "4",
+                        "startColumns": "0",
+                        "startOffsets": "247",
+                        "endColumns": "197",
+                        "endOffsets": "444"
+                    },
+                    "to": {
+                        "startLines": "37",
+                        "startColumns": "4",
+                        "startOffsets": "3974",
+                        "endColumns": "197",
+                        "endOffsets": "4167"
                     }
                 },
                 {
@@ -52,23 +69,6 @@
                         "startOffsets": "5655",
                         "endColumns": "100",
                         "endOffsets": "5751"
-                    }
-                },
-                {
-                    "source": "/Users/suraj/.gradle/caches/transforms-2/files-2.1/f4cb48ab4031ea589d9760d0c31daca6/res/values-sk/values.xml",
-                    "from": {
-                        "startLines": "4",
-                        "startColumns": "0",
-                        "startOffsets": "247",
-                        "endColumns": "197",
-                        "endOffsets": "444"
-                    },
-                    "to": {
-                        "startLines": "37",
-                        "startColumns": "4",
-                        "startOffsets": "3974",
-                        "endColumns": "197",
-                        "endOffsets": "4167"
                     }
                 }
             ]

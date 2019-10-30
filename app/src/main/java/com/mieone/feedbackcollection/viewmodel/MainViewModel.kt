@@ -9,17 +9,12 @@ import android.os.Build
 import android.os.Handler
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
-import android.view.View
 import android.widget.EditText
-import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import com.blankj.utilcode.util.LogUtils
 import com.blankj.utilcode.util.NetworkUtils
 import com.blankj.utilcode.util.ToastUtils
-import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.database.*
-import com.google.firebase.firestore.QueryDocumentSnapshot
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
@@ -27,16 +22,12 @@ import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import com.mieone.feedbackcollection.R
 import com.mieone.feedbackcollection.application.MyApplication
-import com.mieone.feedbackcollection.dialog.DownloadFile
 import com.mieone.feedbackcollection.dialog.DownloadTask
-import com.mieone.feedbackcollection.dialog.UpdateDialog
 import com.mieone.feedbackcollection.model.EmployeeFeedbackModel
 import com.mieone.feedbackcollection.model.UpdateModel
-import com.mieone.feedbackcollection.ui.MainActivity
 import com.mieone.feedbackcollection.utils.ActivityManager
 import com.mieone.feedbackcollection.utils.Constants
 import com.mieone.feedbackcollection.utils.General
-import com.yarolegovich.lovelydialog.LovelyInfoDialog
 import com.yarolegovich.lovelydialog.LovelyStandardDialog
 import java.text.ParseException
 import java.text.SimpleDateFormat
@@ -47,10 +38,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     internal var count = 0
     private var languageList = ArrayList<String>()
-    var isExistence = true
     lateinit var url: String
     var downloadTask: DownloadTask?=null
     val handler: Handler = Handler()
+
+    var name: String? = null
+    var manager: String? = null
+    var vendor: String? = null
+    var department: String? = null
+    var doj: String? = null
+    var employee_status: String? = null
 
     fun getLanguageList(activity: Activity) {
         val languageDialog = SpinnerDialog(activity, languageList, "Select or Search Language", R.style.DialogAnimations_SmileWindow)
@@ -100,13 +97,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                 handler.postDelayed(
                     {
-                            val scanned_id = et_employee_id.text.toString().replace("[-+.^:,]", "")
+//                            val scanned_id = et_employee_id.text.toString().replace("[-+.^:,]", "")
+                            val scanned_id = et_employee_id.text.toString()
                             if (scanned_id.length in 4..12) {
                                 count++
                                 if (count == 1) {
 
                                     ToastUtils.showLong(scanned_id)
-
                                     getEmployeeDetails(scanned_id, activity)
                                     General.hideKeyboard(activity)
 
@@ -128,6 +125,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun getEmployeeDetails(scanned_id: String, activity: Activity) {
 
+//        if (General.getEmployeeID().equals(scanned_id)){
+//            General.redDialog(activity, "$scanned_id Already checked out for the day.", null)
+//
+//            return
+//        }
+
         MyApplication.get()?.getmFirebaseFirestore()?.collection(Constants.EMPLOYEE_RECORDS)
                 ?.document(scanned_id)?.get()?.addOnCompleteListener { task ->
             if (task.isSuccessful) {
@@ -138,12 +141,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                 if (document!!.exists()) {
 
-                    val name = document.getString("name")
-                    val manager = document.getString("manager")
-                    val employee_code = document.getString("employee_code")
-                    val vendor = document.getString("vendor")
-                    val department = document.getString("department")
-                    val doj = document.getString("doj")
+                    name = document.getString("name")
+                    manager = document.getString("manager")
+                    vendor = document.getString("vendor")
+                    department = document.getString("department")
+                    doj = document.getString("doj")
+                    if (document.getString("employee_status") != null) {
+                        employee_status = document.getString("employee_status")
+                    }else{
+                        employee_status = "Active"
+                    }
+
 
                     model.name = name
                     model.manager = manager
@@ -153,20 +161,27 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     model.check_in_time = System.currentTimeMillis()
                     model.isCheckedIn = true
                     model.employee_id = scanned_id
-
-                    getLastCheckTime(scanned_id, activity, model)
+                    model.employee_status = employee_status
 
                 } else {
 
+                    name = ""
+                    manager = ""
+                    vendor = ""
+                    department = ""
+                    doj = ""
+                    employee_status = ""
                     model.check_in_time = System.currentTimeMillis()
                     model.isCheckedIn = true
                     model.employee_id = scanned_id
 
                     General.redDialog(activity, "Not Authorized!! Please contact your manager.", null)
-                    getLastCheckTime(scanned_id, activity, model)
                     LogUtils.e(scanned_id)
 
+
                 }
+//                getLastCheckTime(scanned_id, activity, model)
+                updateInDB(activity, scanned_id, model)
 
                 LogUtils.e(scanned_id)
 
@@ -174,42 +189,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    private fun getLastCheckTime(scanned_id: String, activity: Activity, model: EmployeeFeedbackModel) {
-
-        if (!NetworkUtils.isConnected()) {
-            General.redDialog(activity, "Oops no Internet Connection!", null)
-            return
-        }
+    @SuppressLint("SimpleDateFormat")
+    private fun updateInDB(activity: Activity, scanned_id: String, model: EmployeeFeedbackModel){
 
         val time = System.currentTimeMillis()
-        val c = Calendar.getInstance()
-        c.add(Calendar.HOUR, -16)
-
-        LogUtils.e("TIME ->"+c.timeInMillis)
-
-        MyApplication.get()?.getmFirebaseFirestore()?.collection(Constants.EMPLOYEE_FEEDBACK)
-                ?.whereEqualTo("employee_id", scanned_id)
-                ?.whereGreaterThan("check_in_time", c.timeInMillis)
-                ?.get()
-                ?.addOnCompleteListener { task ->
-                    LogUtils.e(task.isSuccessful)
-                    LogUtils.e(task.result?.isEmpty)
-
-                    if (task.result?.isEmpty!!){
-                        updateCheckInTime(scanned_id, time, activity, model)
-                    } else{
-                        General.redDialog(activity, "$scanned_id Already checked out for the day.", null)
-                    }
-                }
-
-        //                                val runningTime = System.currentTimeMillis() - last_check_in
-//                                val mins = TimeUnit.MILLISECONDS.toMinutes(runningTime)
-
-    }
-
-    @SuppressLint("SimpleDateFormat")
-    private fun updateCheckInTime(scanned_id: String, time: Long,
-                                  activity: Activity, model: EmployeeFeedbackModel) {
 
         try {
             val string1 = "16:59:00"
@@ -217,10 +200,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             val calendar1 = Calendar.getInstance()
             calendar1.time = time1
 
-            val string2 = "7:01:00"
+            val string2 = "07:01:00"
             val time2 = SimpleDateFormat("HH:mm:ss").parse(string2)
+            val newDate =  Date(time2.time + 1 * 24 * 60 * 60 * 1000)
             val calendar2 = Calendar.getInstance()
-            calendar2.time = time2
+            calendar2.time = newDate
 
             val time3 = System.currentTimeMillis()
             val date = Date(time3)
@@ -230,93 +214,25 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             val d = SimpleDateFormat("HH:mm:ss").parse(getDate)
             val calendar3 = Calendar.getInstance()
             calendar3.time = d
-
             val x = calendar3.time
             if (x.after(calendar1.time) && x.before(calendar2.time)) {
-                LogUtils.e("true")
-                General.alertDialog(activity, "Checked in Successfully with employee id $scanned_id", null)
                 model.check_in_time = time
                 model.isCheckedIn = true
                 model.employee_id = scanned_id
 
-                MyApplication.get()?.getmFirebaseFirestore()?.collection(Constants.EMPLOYEE_FEEDBACK)
-                        ?.document()
-                        ?.set(model)?.addOnSuccessListener {
-                            val c = Calendar.getInstance()
-                            c.add(Calendar.HOUR, -16)
-
-                            MyApplication.get()?.getmFirebaseFirestore()?.collection(Constants.EMPLOYEE_FEEDBACK)
-                                    ?.whereEqualTo("employee_id", scanned_id)
-                                    ?.whereGreaterThan("check_in_time", c.timeInMillis)
-                                    ?.get()
-                                    ?.addOnCompleteListener { task ->
-
-                                        for (document in task.result!!){
-                                            LogUtils.e(document.id+" "+document.data)
-                                            val afterTime = document.getLong("check_in_time")
-                                            afterTime?.let { getCheckInTime(document.id, it, activity, scanned_id) }
-                                        }
-                                    }
-                        }
-
-//                getCheckInTime(scanned_id, time, activity, )
+//                MyApplication.get()?.getmFirebaseFirestore()?.collection(Constants.EMPLOYEE_FEEDBACK)
+//                        ?.document()
+//                        ?.set(model)
+                name?.let { manager?.let { it1 -> vendor?.let { it2 -> department?.let { it3 -> doj?.let { it4 -> employee_status?.let { it5 -> ActivityManager.FEEDBACK(activity, it, it1, it2, it3, it4, scanned_id, it5) } } } } } }
             }else{
-                LogUtils.e("false")
                 General.redDialog(activity, "You have crossed the check in time for today.", null)
             }
         } catch (e: ParseException) {
             e.printStackTrace()
         }
 
-
     }
 
-    private fun getCheckInTime(document_id: String, check_in_time: Long, activity: Activity, scanned_id: String) {
-
-        MyApplication.get()?.getmFirebaseFirestore()?.collection(Constants.EMPLOYEE_FEEDBACK)
-                ?.document(document_id)?.get()?.addOnCompleteListener { task ->
-                    val snapshots = task.result
-
-                    val runningTime = System.currentTimeMillis() - check_in_time
-
-                    val mins = TimeUnit.MILLISECONDS.toMinutes(runningTime)
-
-                    LogUtils.e("Minutes ->$mins")
-
-                    LogUtils.e(mins >  6 * 60)
-
-                    if (snapshots?.getBoolean("checkedOut") == true) {
-
-                        General.redDialog(activity, "$scanned_id Already checked out for the day.", null)
-
-                    } else {
-
-                        ActivityManager.FEEDBACK(activity, document_id)
-
-                    }
-
-//            if (mins >  6 * 60) {
-//
-//                    if (snapshots?.getBoolean("checkedOut") == true) {
-//
-//                        General.redDialog(activity, "$scanned_id Already checked out for the day.", null)
-//
-//                    } else {
-//
-//                        ActivityManager.FEEDBACK(activity, document_id)
-//
-//                    }
-//                }
-//            else {
-//
-//                    General.redDialog(activity, "$scanned_id Already checked in.", null)
-//                }
-
-        }?.addOnFailureListener {
-            General.hideKeyboard(activity)
-        }
-
-    }
 
     fun anonymousLogin(activity: Activity){
         MyApplication.get()?.getmAuth()?.signInAnonymously()
